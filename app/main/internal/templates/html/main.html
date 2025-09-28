@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .title }}</title>
+    <script src="/main.js"></script>
+</head>
+<body>
+    <h1>{{ .title }}</h1>
+    <div id="products">
+        {{range .categories}
+        <h2>{{ .Name }}</h2>
+       
+        {{ range .Products }}
+         {{if .Сategory == .Name}}
+        <div class="product" data-id="{{ .id }}">
+            <h2>{{ .Name }}</h2>
+            <p>Price: ${{ .Price }}</p>
+            <p>{{.Description}}</p>
+        </div>
+        {{end}}
+        {{ end }}}
+        {{end}}
+        
+    </div>
+
+    <h3>Cart:</h3>
+    <ul id="cart"></ul>
+    <script>
+
+    </script>
+</body>
+</html>
