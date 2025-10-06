@@ -3,6 +3,8 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
+
 	c "gin/internal/config"
 )
 
@@ -10,7 +12,8 @@ type Storage struct {
 	DB *sql.DB
 }
 
-func New(db *sql.DB, cnf *c.Config) (*Storage, error) {
+func New(db *sql.DB, cnf *c.Config, logger *slog.Logger) (*Storage, error) {
+	var err error
 	connstr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s connect_timeout=%d",
 		cnf.Postgres.Addr,
 		cnf.Postgres.Port,
@@ -21,12 +24,18 @@ func New(db *sql.DB, cnf *c.Config) (*Storage, error) {
 
 		cnf.Postgres.DialTimeout,
 	)
-	db, err := sql.Open("postgres", connstr)
+	logger.Debug("openning db connection")
+	db, err = sql.Open("postgres", connstr)
 	if err != nil {
 		return nil, err
 	}
-	if err := db.Ping(); err != nil {
-		return nil, err
+
+	for i := 0; i < 10; i++ {
+		if err := db.Ping(); err != nil {
+			return nil, err
+		}
+
 	}
+
 	return &Storage{DB: db}, nil
 }

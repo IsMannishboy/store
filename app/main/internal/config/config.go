@@ -14,6 +14,7 @@ func GetConfig() *Config {
 	if err != nil {
 		panic(err)
 	}
+
 	var server Server
 	server.Port = os.Getenv("port")
 	server.Addr = os.Getenv("addr")
@@ -59,6 +60,7 @@ func GetConfig() *Config {
 	cnf.Server = server
 	cnf.Postgres = postgres
 	cnf.Redis = redis
+	cnf.TemplatePath = os.Getenv("template_path")
 	return &cnf
 }
 
@@ -82,8 +84,9 @@ type Redis struct {
 	RwTimeout   int
 }
 type Config struct {
-	Env      string
-	Server   Server
-	Postgres Postgres
-	Redis    Redis
+	TemplatePath string
+	Env          string
+	Server       Server
+	Postgres     Postgres
+	Redis        Redis
 }

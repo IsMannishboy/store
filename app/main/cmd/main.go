@@ -7,6 +7,7 @@ import (
 	handler "gin/internal/handlers"
 	m "gin/internal/migrations"
 	d "gin/internal/storage"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -33,20 +34,23 @@ func main() {
 	logger := setupLogger(cnf.Env)
 	logger.Info("Logger initialized", slog.String("env", cnf.Env))
 	logger.Debug("Debugging information")
-	storage, err := d.New(db, cnf)
+	//postgres connection
+	storage, err := d.New(db, cnf, logger)
 	if err != nil {
 		logger.Error("Failed to initialize storage", slog.String("error", err.Error()))
-		os.Exit(1)
 	}
+	//migrations
 	migrator := m.MustGetNewMigrator()
-	if err := migrator.ApplyMigrations(storage.DB); err != nil {
+	if err := migrator.ApplyMigrations(storage.DB, logger); err != nil {
 		logger.Error("Failed to apply migrations", slog.String("error", err.Error()))
-		os.Exit(1)
 	}
-	router := gin.Default()
-	router.LoadHTMLGlob("D:/gin/app/main/internal/templates/html/*")
 
-	router.GET("/main", handler.Mainhendler(logger, storage.DB))
+	router := gin.Default()
+	main_path := cnf.TemplatePath + "/main.html"
+	router.LoadHTMLGlob(main_path)
+
+	router.GET("/main", handler.Mainhendler(logger, storage.DB, cnf))
+	http.ListenAndServe(":80", router)
 }
 func setupLogger(env string) *slog.Logger {
 

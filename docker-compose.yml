@@ -1,0 +1,27 @@
+services:
+  db:
+    container_name: db
+    image: postgres
+    environment:
+      - POSTGRES_USER=21savage
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=mydb
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+  main:
+    build: ./app/main
+    ports:
+      - "81:81"
+    container_name: main
+    depends_on:
+      - db
+    restart: always
+ 
+    
+
+
+
+
+volumes:
+  pgdata:    
+  

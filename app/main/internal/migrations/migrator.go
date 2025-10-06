@@ -5,6 +5,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -30,7 +31,8 @@ func MustGetNewMigrator() *Migrator {
 	}
 }
 
-func (m *Migrator) ApplyMigrations(db *sql.DB) error {
+func (m *Migrator) ApplyMigrations(db *sql.DB, logger *slog.Logger) error {
+	logger.Debug("applying miggrations ")
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return fmt.Errorf("unable to create db instance: %v", err)
@@ -40,10 +42,6 @@ func (m *Migrator) ApplyMigrations(db *sql.DB) error {
 	if err != nil {
 		return fmt.Errorf("unable to create migration: %v", err)
 	}
-
-	defer func() {
-		migrator.Close()
-	}()
 
 	if err = migrator.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return fmt.Errorf("unable to apply migrations %v", err)

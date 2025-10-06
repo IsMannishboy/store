@@ -8,26 +8,26 @@
 <body>
     <h1>{{ .title }}</h1>
     <div id="products">
-        {{range .categories}
-        <h2>{{ .Name }}</h2>
-       
-        {{ range .Products }}
-         {{if .Сategory == .Name}}
-        <div class="product" data-id="{{ .id }}">
-            <h2>{{ .Name }}</h2>
-            <p>Price: ${{ .Price }}</p>
-            <p>{{.Description}}</p>
-        </div>
-        {{end}}
-        {{ end }}}
-        {{end}}
-        
+        {{ if .Products }}
+            {{ range .Categories }}
+                <h2>{{ .Name }}</h2>
+                {{ $catName := .Name }}
+                {{ range $.Products }}
+                    {{ if eq .Category $catName }}
+                        <div class="product" data-id="{{ .ID }}">
+                            <h2>{{ .Name }}</h2>
+                            <p>Price: ${{ .Price }}</p>
+                            <p>{{ .Description }}</p>
+                        </div>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+        {{ else }}
+            <h1>empty store</h1>
+        {{ end }}
     </div>
 
     <h3>Cart:</h3>
     <ul id="cart"></ul>
-    <script>
-
-    </script>
 </body>
 </html>
