@@ -1,6 +1,6 @@
 create table products (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(150),
+    prod_name VARCHAR(150),
     description TEXT,
     price DECIMAL(10,2),
     stock INT,

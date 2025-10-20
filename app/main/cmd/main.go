@@ -1,8 +1,6 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	c "gin/internal/config"
 	handler "gin/internal/handlers"
 	m "gin/internal/migrations"
@@ -22,22 +20,26 @@ const (
 	EnvLocal = "local"
 )
 
-var db *sql.DB
-
 // todo: script service
 // todo: auth service
 func main() {
 	// Initialize configuration
 	cnf := c.GetConfig()
-	fmt.Println(cnf)
+
 	// Setup logger based on environment
 	logger := setupLogger(cnf.Env)
 	logger.Info("Logger initialized", slog.String("env", cnf.Env))
 	logger.Debug("Debugging information")
 	//postgres connection
-	storage, err := d.New(db, cnf, logger)
+	storage, err := d.NewPostgresDb(cnf, logger)
 	if err != nil {
 		logger.Error("Failed to initialize storage", slog.String("error", err.Error()))
+
+	}
+	//cash inticialiation
+	cash, err := d.NewRedisDb(cnf)
+	if err != nil {
+		logger.Debug("redis connection error:", err.Error())
 	}
 	//migrations
 	migrator := m.MustGetNewMigrator()
@@ -49,7 +51,7 @@ func main() {
 	main_path := cnf.TemplatePath + "/main.html"
 	router.LoadHTMLGlob(main_path)
 
-	router.GET("/main", handler.Mainhendler(logger, storage.DB, cnf))
+	router.GET("/main/:csrf", handler.Mainhendler(logger, storage.DB, cash.Redis_db, cnf))
 	http.ListenAndServe(":80", router)
 }
 func setupLogger(env string) *slog.Logger {

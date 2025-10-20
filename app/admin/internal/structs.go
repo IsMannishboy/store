@@ -1,0 +1,48 @@
+package internal
+
+import (
+	"time"
+)
+
+type Config struct {
+	HTMLPath string
+	Secret   string
+	Server   Server
+	Postgres Postgres
+	Redis    Redis
+}
+type Postgres struct {
+	Host        string
+	Port        int
+	Db          string
+	RwTimeout   int
+	DialTimeout int
+	Password    string
+	User        string
+	Sslmode     string
+}
+type Redis struct {
+	Addr        string
+	DialTimeout int
+	RwTimeout   int
+	DbIndex     int
+}
+type Server struct {
+	Port int
+}
+type Session struct {
+	Id     string
+	UserId int
+	Exp    time.Time
+}
+type SessionValue struct {
+	UserId int
+	Exp    time.Time
+}
+type CSRFvalue struct {
+	UserId int
+	Exp    time.Time
+}
+type MainPage struct {
+	CSRF string
+}

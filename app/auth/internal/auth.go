@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -29,14 +28,15 @@ func MakePassword(passord string) ([]byte, error) {
 	}
 	return hash, nil
 }
-func CreateSession(id string, redis_db *redis.Client) (Session, error) {
+func CreateSession(id int) (Session, error) {
 	var session Session
 	sesion_id := make([]byte, 32)
 	_, err := rand.Read(sesion_id)
 	if err != nil {
 		return session, err
 	}
-	session.Id = hex.EncodeToString(sesion_id)
+	session.Id = base64.StdEncoding.EncodeToString(sesion_id)
+	fmt.Println("creating session, user id:", session.Id)
 	session.UserId = id
 	session.Exp = time.Now().Add(24 * time.Hour)
 	return session, nil
@@ -47,7 +47,16 @@ func AddSessionToCash(ctx context.Context, session Session, redis_db *redis.Clie
 	var value SessionValue
 	value.Exp = session.Exp
 	value.UserId = session.UserId
-	err := redis_db.Set(newcontext, session.Id, value, 30*time.Minute).Err()
+	fmt.Println("to marshal:")
+	fmt.Println("value.Exp:", value.Exp)
+	fmt.Println("user id:", value.UserId)
+	marshal_value, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	fmt.Println("session id to cash:", session.Id)
+	fmt.Println("session value to cash:", marshal_value)
+	err = redis_db.Set(newcontext, session.Id, marshal_value, 30*time.Minute).Err()
 	if err != nil {
 		return err
 	}
@@ -57,10 +66,22 @@ func GetSession(redis_db *redis.Client, sessionID string, ctx context.Context, t
 	newcontext, cancel := context.WithTimeout(ctx, time.Second*time.Duration(timeout))
 	defer cancel()
 	var value SessionValue
-	err := redis_db.Get(newcontext, sessionID).Scan(&value)
+	fmt.Println("getting session value :", sessionID)
+	hashed, err := redis_db.Get(newcontext, sessionID).Result()
+	if err != nil {
+		fmt.Println("err while getting value by:", sessionID)
+		return value, err
+	}
+	fmt.Println("string value:", hashed)
+
+	err = json.Unmarshal([]byte(hashed), &value)
+	if err != nil {
+		fmt.Println("err while Unmarshal")
+		return value, fmt.Errorf("error while unmarshal session value:", err.Error())
+	}
 	return value, err
 }
-func CreateCSRF(secret string, userId string) (string, error) {
+func CreateCSRF(secret string, userId int) (string, error) {
 	val := CSRFvalue{
 		UserId: userId,
 		Exp:    time.Now().Add(30 * time.Minute),
@@ -125,4 +146,13 @@ func VerifyCSRF(secret string, token string) (string, error) {
 	}
 
 	return token, nil
+}
+func DeleteSession(ctx context.Context, rwtimeout int, session_id string, redis_db *redis.Client) error {
+	newcontext, cancel := context.WithTimeout(ctx, time.Duration(rwtimeout)*time.Second)
+	defer cancel()
+	err := redis_db.Del(newcontext, session_id).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }

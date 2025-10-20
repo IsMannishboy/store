@@ -16,15 +16,16 @@ type Login struct {
 }
 type Session struct {
 	Id     string
-	UserId string
+	UserId int
 	Exp    time.Time
 }
 type SessionValue struct {
-	UserId string
+	UserId int
 	Exp    time.Time
+	Role   string
 }
 type CSRFvalue struct {
-	UserId string
+	UserId int
 	Exp    time.Time
 }
 type Server struct {

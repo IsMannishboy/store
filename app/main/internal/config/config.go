@@ -61,6 +61,7 @@ func GetConfig() *Config {
 	cnf.Postgres = postgres
 	cnf.Redis = redis
 	cnf.TemplatePath = os.Getenv("template_path")
+	cnf.Secret = os.Getenv("secret")
 	return &cnf
 }
 
@@ -84,6 +85,7 @@ type Redis struct {
 	RwTimeout   int
 }
 type Config struct {
+	Secret       string
 	TemplatePath string
 	Env          string
 	Server       Server
