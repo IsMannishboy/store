@@ -34,10 +34,12 @@ type Session struct {
 	Id     string
 	UserId int
 	Exp    time.Time
+	Role   string
 }
 type SessionValue struct {
 	UserId int
 	Exp    time.Time
+	Role   string
 }
 type CSRFvalue struct {
 	UserId int

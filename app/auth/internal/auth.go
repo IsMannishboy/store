@@ -28,7 +28,7 @@ func MakePassword(passord string) ([]byte, error) {
 	}
 	return hash, nil
 }
-func CreateSession(id int) (Session, error) {
+func CreateSession(id int, role string) (Session, error) {
 	var session Session
 	sesion_id := make([]byte, 32)
 	_, err := rand.Read(sesion_id)
@@ -39,6 +39,7 @@ func CreateSession(id int) (Session, error) {
 	fmt.Println("creating session, user id:", session.Id)
 	session.UserId = id
 	session.Exp = time.Now().Add(24 * time.Hour)
+	session.Role = role
 	return session, nil
 }
 func AddSessionToCash(ctx context.Context, session Session, redis_db *redis.Client, timeout int) error {

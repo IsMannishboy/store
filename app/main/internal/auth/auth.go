@@ -16,6 +16,8 @@ import (
 
 func CheckSession(session_id string, redis_db *redis.Client, timeout int, ctx context.Context) (error, int) {
 	newcontext, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	fmt.Println("session from cookie:", session_id)
+
 	defer cancel()
 	var value s.SessionValue
 	baitiki, err := redis_db.Get(newcontext, session_id).Result()
@@ -28,7 +30,6 @@ func CheckSession(session_id string, redis_db *redis.Client, timeout int, ctx co
 	if err != nil {
 		return err, 0
 	}
-	fmt.Println("session from cookie:", session_id)
 	fmt.Println("stored user id:", value.UserId)
 	fmt.Println("stored exp session:", value.Exp)
 

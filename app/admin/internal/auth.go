@@ -13,28 +13,30 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func CheckSession(ctx context.Context, sessionid string, redis_db *redis.Client, RwTimeout time.Duration) (error, SessionValue) {
+func CheckSession(ctx context.Context, sessionid string, redis_db *redis.Client, RwTimeout time.Duration) error {
 	newcontext, cancel := context.WithTimeout(ctx, RwTimeout*time.Second)
 	defer cancel()
 	var value SessionValue
 	var strvalue string
 	err := redis_db.Get(newcontext, sessionid).Scan(&strvalue)
 	if err != nil {
-		return err, value
+		return err
 	}
 	err = json.Unmarshal([]byte(strvalue), &value)
 	if err != nil {
-		return err, value
+		return err
 	}
-
+	if value.Role != "admin" {
+		return fmt.Errorf("wrong role")
+	}
 	if time.Now().After(value.Exp) {
-		return fmt.Errorf("session exp"), value
+		return fmt.Errorf("session exp")
 	}
-	err = redis_db.Set(ctx, sessionid, strvalue, 30*time.Minute).Err()
+	err = redis_db.Set(newcontext, sessionid, strvalue, 30*time.Minute).Err()
 	if err != nil {
-		return err, value
+		return err
 	}
-	return nil, value
+	return nil
 }
 func AddSessionToCash(ctx context.Context, session Session, RwTimeout time.Duration, redis_db *redis.Client) error {
 	var value = SessionValue{UserId: session.UserId, Exp: session.Exp}

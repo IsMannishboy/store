@@ -27,7 +27,7 @@ func LoginHandler(redis_db *redis.Client, db *sql.DB, logger *log.Logger) gin.Ha
 
 		MainContext := c.Request.Context()
 		/// logincon section
-		id, hashed, err := i.GetUserIdAndPass(db, MainContext, login.Username, cnf.Postgres.RwTimeout)
+		id, hashed, role, err := i.GetUserIdAndPassAndRole(db, MainContext, login.Username, cnf.Postgres.RwTimeout)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				logger.Print("error while getting user id:", err.Error())
@@ -45,7 +45,7 @@ func LoginHandler(redis_db *redis.Client, db *sql.DB, logger *log.Logger) gin.Ha
 			return
 		}
 		/// session section
-		session, err := i.CreateSession(id)
+		session, err := i.CreateSession(id, role)
 		if err != nil {
 			logger.Print("CreateSession err:", err)
 			c.String(500, err.Error())
@@ -98,7 +98,8 @@ func RegisterHandler(redis_db *redis.Client, db *sql.DB, logger *log.Logger) gin
 			c.String(500, err.Error())
 			return
 		}
-		session, err := i.CreateSession(id)
+
+		session, err := i.CreateSession(id, "user")
 		if err != nil {
 			logger.Print("CreateSession err:", err)
 			c.String(500, err.Error())

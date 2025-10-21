@@ -40,13 +40,23 @@ func CreateUser(db *sql.DB, ctx context.Context, reg Register, timeout int) (int
 	}
 
 }
-func GetUserIdAndPass(db *sql.DB, ctx context.Context, username string, timeout int) (int, []byte, error) {
+func GetUserIdAndPassAndRole(db *sql.DB, ctx context.Context, username string, timeout int) (int, []byte, string, error) {
 	newcontext, cancel := context.WithTimeout(ctx, time.Second*time.Duration(timeout))
 	defer cancel()
 	var id int
 	var pass []byte
+	var role string
 	var err error
-	err = db.QueryRowContext(newcontext, `select id,pass from users where username = $1`, username).Scan(&id, &pass)
+	err = db.QueryRowContext(newcontext, `select id,pass,role from users where username = $1`, username).Scan(&id, &pass, &role)
 
-	return id, pass, err
+	return id, pass, role, err
+}
+func GetRole(ref string) string {
+	if ref == "http://localhost/admin/login" {
+		return "admin"
+	} else if ref == "http://localhost/login" {
+		return "user"
+
+	}
+	return ""
 }

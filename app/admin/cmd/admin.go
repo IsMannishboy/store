@@ -36,12 +36,13 @@ func MainHandler(logger *log.Logger, redis_db *redis.Client, db *sql.DB, cnf *i.
 			}
 		}
 		MainContext := c.Request.Context()
-		err, _ = i.CheckSession(MainContext, session_id, redis_db, time.Duration(cnf.Redis.RwTimeout))
+		err = i.CheckSession(MainContext, session_id, redis_db, time.Duration(cnf.Redis.RwTimeout))
 		if err != nil {
 			logger.Print("CheckSession err:", err)
 			c.String(403, err.Error())
 			return
 		}
+
 		c.HTML(200, "main.html", gin.H{
 			"csrf": new_csrf,
 		})

@@ -29,12 +29,18 @@ func Mainhendler(logger *slog.Logger, db *sql.DB, redis_db *redis.Client, cnf *c
 		for _, ck := range c.Request.Cookies() {
 			if len(ck.Name) > len("session_id_") {
 				cookie_id := ck.Name[len("session_id_"):]
+				fmt.Println("cookie_id:", cookie_id)
 				int_id, err := strconv.Atoi(cookie_id)
+
 				if err != nil {
+					fmt.Println("err strconv:", err)
 					continue
 				}
+				fmt.Println("int_cookie_id:", int_id)
+
 				if int_id == user_id {
 					session_id = ck.Value
+					fmt.Println("id from cookie:", int_id, " and from csrf:", user_id, " matches")
 					break
 				}
 			}
@@ -45,6 +51,7 @@ func Mainhendler(logger *slog.Logger, db *sql.DB, redis_db *redis.Client, cnf *c
 			c.String(403, fmt.Errorf("err while getting session id").Error())
 			return
 		}
+		logger.Debug("session_id:", session_id)
 		err, id := a.CheckSession(session_id, redis_db, cnf.Redis.RwTimeout, Maincontext)
 		if err != nil {
 			logger.Debug("CheckSession err:", err)
