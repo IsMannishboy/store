@@ -3,7 +3,6 @@ package main
 import (
 	c "gin/internal/config"
 	handler "gin/internal/handlers"
-	m "gin/internal/migrations"
 	d "gin/internal/storage"
 	"net/http"
 
@@ -41,14 +40,9 @@ func main() {
 	if err != nil {
 		logger.Debug("redis connection error:", err.Error())
 	}
-	//migrations
-	migrator := m.MustGetNewMigrator()
-	if err := migrator.ApplyMigrations(storage.DB, logger); err != nil {
-		logger.Error("Failed to apply migrations", slog.String("error", err.Error()))
-	}
 
 	router := gin.Default()
-	main_path := cnf.TemplatePath + "/main.html"
+	main_path := cnf.TemplatePath
 	router.LoadHTMLGlob(main_path)
 
 	router.GET("/main/:csrf", handler.Mainhendler(logger, storage.DB, cash.Redis_db, cnf))
