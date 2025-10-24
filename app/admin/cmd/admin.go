@@ -3,8 +3,10 @@ package main
 import (
 	i "admin/internal"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -15,6 +17,7 @@ import (
 func MainHandler(logger *log.Logger, redis_db *redis.Client, db *sql.DB, cnf *i.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		csrf := c.Param("csrf")
+		fmt.Println("csrf:", csrf)
 		user_id, new_csrf, err := i.CheckCSRF(csrf, []byte(cnf.Secret))
 		if err != nil {
 			logger.Print("CheckCSRF err:", err)
@@ -35,8 +38,10 @@ func MainHandler(logger *log.Logger, redis_db *redis.Client, db *sql.DB, cnf *i.
 				}
 			}
 		}
+		decodedValue, _ := url.QueryUnescape(session_id)
+
 		MainContext := c.Request.Context()
-		err = i.CheckSession(MainContext, session_id, redis_db, time.Duration(cnf.Redis.RwTimeout))
+		err = i.CheckSession(MainContext, decodedValue, redis_db, time.Duration(cnf.Redis.RwTimeout))
 		if err != nil {
 			logger.Print("CheckSession err:", err)
 			c.String(403, err.Error())

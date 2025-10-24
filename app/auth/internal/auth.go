@@ -35,7 +35,8 @@ func CreateSession(id int, role string) (Session, error) {
 	if err != nil {
 		return session, err
 	}
-	session.Id = base64.StdEncoding.EncodeToString(sesion_id)
+	fmt.Println("URLEncoding method")
+	session.Id = base64.URLEncoding.EncodeToString(sesion_id)
 	fmt.Println("creating session, user id:", session.Id)
 	session.UserId = id
 	session.Exp = time.Now().Add(24 * time.Hour)
@@ -48,6 +49,7 @@ func AddSessionToCash(ctx context.Context, session Session, redis_db *redis.Clie
 	var value SessionValue
 	value.Exp = session.Exp
 	value.UserId = session.UserId
+	value.Role = session.Role
 	fmt.Println("to marshal:")
 	fmt.Println("value.Exp:", value.Exp)
 	fmt.Println("user id:", value.UserId)

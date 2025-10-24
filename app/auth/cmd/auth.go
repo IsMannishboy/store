@@ -45,6 +45,7 @@ func LoginHandler(redis_db *redis.Client, db *sql.DB, logger *log.Logger) gin.Ha
 			return
 		}
 		/// session section
+		fmt.Println("role:", role)
 		session, err := i.CreateSession(id, role)
 		if err != nil {
 			logger.Print("CreateSession err:", err)

@@ -47,7 +47,8 @@ func GetUserIdAndPassAndRole(db *sql.DB, ctx context.Context, username string, t
 	var pass []byte
 	var role string
 	var err error
-	err = db.QueryRowContext(newcontext, `select id,pass,role from users where username = $1`, username).Scan(&id, &pass, &role)
+	fmt.Println("username:", username)
+	err = db.QueryRowContext(newcontext, `select id,pass,rolee from users where username = $1`, username).Scan(&id, &pass, &role)
 
 	return id, pass, role, err
 }

@@ -60,11 +60,11 @@ func CheckCSRF(csrf string, secret []byte) (int, string, error) {
 	}
 	csrfdata = parts[0]
 	signature = parts[1]
-	data, err := base64.StdEncoding.DecodeString(csrfdata)
+	data, err := base64.URLEncoding.DecodeString(csrfdata)
 	if err != nil {
 		return 0, csrf, err
 	}
-	sign, err := base64.StdEncoding.DecodeString(signature)
+	sign, err := base64.URLEncoding.DecodeString(signature)
 	if err != nil {
 		return 0, csrf, err
 	}

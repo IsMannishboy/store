@@ -8,6 +8,7 @@ import (
 	f "gin/internal/funcs"
 	s "gin/internal/structs"
 	"log/slog"
+	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -51,8 +52,9 @@ func Mainhendler(logger *slog.Logger, db *sql.DB, redis_db *redis.Client, cnf *c
 			c.String(403, fmt.Errorf("err while getting session id").Error())
 			return
 		}
-		logger.Debug("session_id:", session_id)
-		err, id := a.CheckSession(session_id, redis_db, cnf.Redis.RwTimeout, Maincontext)
+		decodedValue, _ := url.QueryUnescape(session_id)
+		fmt.Println("session from cookie:", decodedValue)
+		err, id := a.CheckSession(decodedValue, redis_db, cnf.Redis.RwTimeout, Maincontext)
 		if err != nil {
 			logger.Debug("CheckSession err:", err)
 			c.String(500, err.Error())
