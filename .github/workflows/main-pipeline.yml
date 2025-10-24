@@ -3,6 +3,8 @@ name: main service pipeline
 on:
   push:
     branches: [ "main" ]
+    paths: 
+      - "app/main**"
     
   
 
