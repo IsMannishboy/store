@@ -95,26 +95,28 @@
                     </tr>
                 </thead>
                 <tbody id="product-table">
-                    <tr>
-                        <td>1</td>
-                        <td>Кроссовки Nike</td>
-                        <td>120 €</td>
-                        <td>В наличии</td>
+                    {{if .products}}
+                    {{range .products}}
+                        <tr>
+                        <td>{{.Id}}</td>
+                        <td>{{.Name}}</td>
+                        <td>{{.Price}}</td>
+                        {{if .Stock}}
+                            <td> в наличии: {{.Stock}}</td>
+                        {{else}}
+                            <td>не в наличии</td>
+                        {{end}}
+                        <td>{{.Description}}</td>
+                        <td>{{.Category}}</td>
                         <td>
                             <button class="btn">✏️ Редактировать</button>
                             <button class="btn">🗑 Удалить</button>
                         </td>
                     </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Футболка Adidas</td>
-                        <td>45 €</td>
-                        <td>Нет в наличии</td>
-                        <td>
-                            <button class="btn">✏️ Редактировать</button>
-                            <button class="btn">🗑 Удалить</button>
-                        </td>
-                    </tr>
+                    {{end}}
+                    {{end}}
+                   
+                    
                 </tbody>
             </table>
             <br>

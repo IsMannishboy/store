@@ -45,6 +45,24 @@ type CSRFvalue struct {
 	UserId int
 	Exp    time.Time
 }
+type Product struct {
+	Id          int
+	Name        string
+	Description string
+	Price       float64
+	Stock       int
+	Category    string
+}
+type ChanProducts struct {
+	Id       int
+	Products []Product
+	Err      error
+}
+type ChanCats struct {
+	Categories []string
+	Err        error
+}
 type MainPage struct {
-	CSRF string
+	Products   []Product
+	Categories []string
 }

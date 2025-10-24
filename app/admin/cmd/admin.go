@@ -47,9 +47,16 @@ func MainHandler(logger *log.Logger, redis_db *redis.Client, db *sql.DB, cnf *i.
 			c.String(403, err.Error())
 			return
 		}
-
+		MainPage, err := i.GetMainPage(MainContext, db, cnf.Postgres.RwTimeout)
+		if err != nil {
+			logger.Print("MainPage:", err)
+			c.String(500, err.Error())
+			return
+		}
 		c.HTML(200, "main.html", gin.H{
-			"csrf": new_csrf,
+			"csrf":       new_csrf,
+			"products":   MainPage.Products,
+			"categories": MainPage.Categories,
 		})
 	}
 }
@@ -72,5 +79,6 @@ func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob(cnf.HTMLPath + "/main.html")
 	router.GET("/main/:csrf", MainHandler(logger, redis_db, db, &cnf))
+	router.GET("/main/users/:csrf", MainHandler(logger, redis_db, db, &cnf))
 	http.ListenAndServe(":80", router)
 }
