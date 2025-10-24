@@ -16,6 +16,7 @@ services:
        
   main:
     build: ./app/main
+    image: hoochie/main:latest
     ports:
       - "81:80"
     container_name: main
@@ -32,6 +33,7 @@ services:
 
   auth: 
     build: ./app/auth
+    image: hoochie/auth:latest
     ports:
       - "82:80"
     container_name: auth
@@ -44,6 +46,7 @@ services:
     - daun-net
   admin:
     build: ./app/admin
+    image: hoochie/admin:latest
     ports:
      - "83:80"
     container_name: admin
@@ -59,6 +62,7 @@ services:
   nginx:
     container_name: store_nginx
     build: ./app/nginx
+    image: hoochie/nginx:latest
     depends_on:
       - auth
     restart: always
