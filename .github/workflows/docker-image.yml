@@ -15,4 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: cd app && docker compose up --build
+      run: cd app && docker compose up -d --build
+    - name: testiki
+      run: 
