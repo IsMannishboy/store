@@ -17,4 +17,4 @@ jobs:
     - name: Build the Docker image
       run: cd app && docker compose up -d --build
     - name: testiki
-      run: 
+      run: docker exec main go test ./
