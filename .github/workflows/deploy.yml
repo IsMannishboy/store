@@ -1,0 +1,42 @@
+name: Smart CI/CD
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+     - "app/**"
+
+jobs:
+  main-job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: run bash
+        id: detect
+        run: |
+            chmod +x ./pipeline.sh
+            ./pipeline.sh
+      - name: docker_hub_connect
+        uses: docker/login-action@v3   
+        with:
+          username: ${{secrets.DOCKERHUB_USER}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+      - name: build and push images
+        run: |
+         SERVICES="${{ steps.detect.outputs.services }}"
+         for  dir in $SERVICES ;do
+                cd ./app/$dir && docker build -t ${{secrets.DOCKERHUB_USER}}/$dir:latest .
+                docker push ${{secrets.DOCKERHUB_USER}}/$dir:latest
+         done 
+      - name: deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{secrets.SERVER_HOST}}
+          username: ${{secrets.SERVER_USER}}
+          key: ${{secrets.SERVER_SSH_KEY}}
+          script: |
+            docker compose pull 
+            docker compose up -d 
+            docker image prune
+      
+
