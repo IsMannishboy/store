@@ -2,8 +2,9 @@ name: main test
 
 on:
   push:
-    branches-ignore:
-      - main
+    branches: dev
+    paths:
+      - "app/**"
     
   
 
@@ -16,9 +17,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: cd app && docker compose up -d --build
+    - name: get services
+    - id: testiki
+    - run: |
+        chmod +x ./testy.sh
+        ./testy.sh
     - name: testiki
-      run: docker exec main go test ./
+      run: |
+        services=(${{steps.testiki.outputs.services}})
+        for dir in $services;do
+          docker build -t $dir ./app/$dir
+          docker exec -i $dir run go test ./...
+          
+        done
     
 
