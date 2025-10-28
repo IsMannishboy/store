@@ -23,7 +23,7 @@ jobs:
           password: ${{secrets.DOCKERHUB_TOKEN}}
       - name: build and push images
         run: |
-         SERVICES="${{ steps.detect.outputs.services }}"
+         SERVICES=(${{ steps.detect.outputs.services }})
          for  dir in $SERVICES ;do
                 cd ./app/$dir && docker build -t ${{secrets.DOCKERHUB_USER}}/$dir:latest .
                 docker push ${{secrets.DOCKERHUB_USER}}/$dir:latest
