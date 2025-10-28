@@ -17,16 +17,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: get services
-    - id: testiki
-    - run: |
-        chmod +x ./testy.sh
-        ./testy.sh
     - name: testiki
       run: |
-        services=(${{steps.testiki.outputs.services}})
+        docker compose up --build -d
+        services=($(docker images --format "{{.Repository}}"))
         for dir in $services;do
-          docker build -t $dir ./app/$dir
           docker exec -i $dir run go test ./...
           
         done
