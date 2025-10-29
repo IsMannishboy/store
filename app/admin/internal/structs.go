@@ -66,6 +66,17 @@ type ChanCats struct {
 	Categories []Category
 	Err        error
 }
+type User struct {
+	Id        int
+	Username  string
+	Firstname string
+	Email     string
+	Password  string
+}
+type ChanUsers struct {
+	Users []User
+	Err   error
+}
 type MainPage struct {
 	Products   []Product
 	Categories []Category

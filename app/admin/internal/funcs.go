@@ -52,8 +52,32 @@ func GetCats(ch chan ChanCats, ctx context.Context, timeout int, db *sql.DB) {
 	ch <- resp
 
 }
-func GetUsers() {
-
+func GetUsers(ch chan ChanUsers, ctx context.Context, db *sql.DB, timeout int) {
+	var users ChanUsers
+	users.Err = nil
+	newcontext, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer cancel()
+	rows, err := db.QueryContext(newcontext, `select * from users`)
+	if err != nil {
+		users.Err = err
+		ch <- users
+		return
+	}
+	for rows.Next() {
+		var id int
+		var username string
+		var firstname string
+		var email string
+		var Password string
+		err = rows.Scan(&id, &username, &firstname, &email, &Password)
+		if err != nil {
+			users.Err = err
+			ch <- users
+		}
+		var user = User{Id: id, Username: username, Firstname: firstname, Email: email, Password: Password}
+		users.Users = append(users.Users, user)
+	}
+	ch <- users
 }
 func GetMainPage(ctx context.Context, db *sql.DB, timeout int) (MainPage, error) {
 	prod_chan := make(chan ChanProducts)
