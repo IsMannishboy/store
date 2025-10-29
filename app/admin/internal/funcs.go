@@ -18,7 +18,7 @@ func GetProducts(ch chan ChanProducts, ctx context.Context, timeout int, db *sql
 	}
 	for rows.Next() {
 		var prod Product
-		err := rows.Scan(prod)
+		err := rows.Scan(&prod.Id, &prod.Name, &prod.Description, &prod.Price, &prod.Stock, &prod.Category)
 		if err != nil {
 			resp.Err = err
 			ch <- resp
@@ -40,13 +40,13 @@ func GetCats(ch chan ChanCats, ctx context.Context, timeout int, db *sql.DB) {
 		return
 	}
 	for rows.Next() {
-		var prod string
-		err := rows.Scan(prod)
+		var cat Category
+		err := rows.Scan(&cat.Id, &cat.Name)
 		if err != nil {
 			resp.Err = err
 			ch <- resp
 		}
-		resp.Categories = append(resp.Categories, prod)
+		resp.Categories = append(resp.Categories, cat)
 	}
 	resp.Err = nil
 	ch <- resp
