@@ -80,5 +80,6 @@ func main() {
 	router.LoadHTMLGlob(cnf.HTMLPath + "/main.html")
 	router.GET("/main/:csrf", MainHandler(logger, redis_db, db, &cnf))
 	router.GET("/main/users/:csrf", MainHandler(logger, redis_db, db, &cnf))
+	fmt.Println("hello world")
 	http.ListenAndServe(":80", router)
 }
