@@ -22,6 +22,7 @@ jobs:
         docker compose up --build -d
         services=($(docker ps --format "{{.Names}}"))
         for dir in $services;do
+          echo "container:$dir"
           docker exec -i $dir run go test ./...
           
         done
