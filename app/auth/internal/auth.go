@@ -80,7 +80,7 @@ func GetSession(redis_db *redis.Client, sessionID string, ctx context.Context, t
 	err = json.Unmarshal([]byte(hashed), &value)
 	if err != nil {
 		fmt.Println("err while Unmarshal")
-		return value, fmt.Errorf("error while unmarshal session value:", err.Error())
+		return value, fmt.Errorf("error while unmarshal session value: %w", err)
 	}
 	return value, err
 }

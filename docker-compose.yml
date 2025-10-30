@@ -77,7 +77,7 @@ services:
   cash:
     build: ./app/redis
     container_name: cash
-    image: hoochie/nginx:latest
+    image: hoochie/cash:latest
     ports:
       - ":6379"
     restart: always
