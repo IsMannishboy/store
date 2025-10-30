@@ -20,6 +20,7 @@ jobs:
     - name: testiki
       run: |
         docker compose up  -d
+        sleep 10
         services=($(docker ps --format "{{.Names}}"))
         echo "services:${serives[@]}"
         docker ps -a
