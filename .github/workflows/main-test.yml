@@ -21,8 +21,9 @@ jobs:
       run: |
         docker compose up --build -d
         services=($(docker ps --format "{{.Names}}"))
+        echo "services:$serives"
         for dir in ${services[@]}; do
-        if [ "$dir" != "cash" ] && [ "$dir" != "store_nginx" ]; then
+        if [ "$dir" != "cash" ] && [ "$dir" != "store_nginx" ] && [ "$dir" != "mydb" ]; then
           echo "container: $dir"
           docker exec -i "$dir" go test ./...
         fi
