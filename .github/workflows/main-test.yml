@@ -22,7 +22,7 @@ jobs:
         docker compose up --build -d
         echo "⏳ Waiting for containers to start..."
         sleep 5
-
+        docker compose logs --tail=100
         services=($(docker ps -a --format "{{.Names}}"))
         echo "Services: ${services[@]}"
 
@@ -44,6 +44,8 @@ jobs:
             state=$(docker inspect -f '{{.State.Status}}' "$dir")
             if [ "$state" != "running" ]; then
               echo "❌ $dir is not running (state=$state), skipping tests"
+              docker logs $dir
+
               continue
             fi
 
