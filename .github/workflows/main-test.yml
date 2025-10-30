@@ -22,6 +22,8 @@ jobs:
         docker compose up --build -d
         services=($(docker ps --format "{{.Names}}"))
         echo "services:${serives[@]}"
+        docker ps -a
+        docker compose logs
         for dir in ${services[@]}; do
         if [ "$dir" != "cash" ] && [ "$dir" != "store_nginx" ] && [ "$dir" != "mydb" ]; then
           echo "container: $dir"
