@@ -17,6 +17,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: testiki
       run: |
         docker compose up --build -d
