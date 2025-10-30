@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: testiki
       run: |
-        docker compose up --build -d
+        docker compose up  -d
         services=($(docker ps --format "{{.Names}}"))
         echo "services:${serives[@]}"
         docker ps -a
