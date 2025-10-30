@@ -6,7 +6,8 @@ services:
       - POSTGRES_USER=21savage
       - POSTGRES_PASSWORD=1234
       - POSTGRES_DB=mydb
-    
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     
     networks:
       - daun-net
@@ -15,14 +16,15 @@ services:
        
   main:
     build: ./app/main
-    image: hoochie/main:latest
     ports:
       - "81:80"
     container_name: main
     depends_on:
       - mydb
     restart: always
-   
+    volumes:
+      - /home/savage21/hardWork/go/store/store/app/main/internal/templates/html:/app/internal/templates/html
+      - /home/savage21/hardWork/go/store/store/app/main:/app
 
     networks:
     - daun-net
@@ -30,11 +32,11 @@ services:
 
   auth: 
     build: ./app/auth
-    image: hoochie/auth:latest
     ports:
       - "82:80"
     container_name: auth
-    
+    volumes:
+      - /home/savage21/hardWork/go/store/store/app/auth:/app
     depends_on:
       - main
     restart: always
@@ -42,11 +44,11 @@ services:
     - daun-net
   admin:
     build: ./app/admin
-    image: hoochie/admin:latest
     ports:
      - "83:80"
     container_name: admin
-    
+    volumes:
+      - /home/savage21/hardWork/go/store/store/app/admin:/app
     depends_on:
       - mydb
     restart: always
@@ -57,31 +59,34 @@ services:
   nginx:
     container_name: store_nginx
     build: ./app/nginx
-    image: hoochie/nginx:latest
     depends_on:
       - auth
     restart: always
     ports :
       - "80:80"
-   
+    volumes:
+    - /home/savage21/hardWork/go/store/store/app/nginx/html:/usr/share/nginx/html
+    - /home/savage21/hardWork/go/store/store/app/nginx/conf/default.conf:/etc/nginx/conf.d/default.conf
     networks:
     - daun-net
        
   cash:
     build: ./app/redis
     container_name: cash
-    image: hoochie/cash:latest
     ports:
       - ":6379"
     restart: always
-    
+    volumes:
+      - cash:/data
     networks:
     - daun-net
       
     
 
 
-
+volumes:
+  pgdata:
+  cash:
 networks:
   daun-net:
     driver: bridge 

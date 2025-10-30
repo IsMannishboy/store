@@ -72,6 +72,7 @@ type User struct {
 	Firstname string
 	Email     string
 	Password  string
+	Role      string
 }
 type ChanUsers struct {
 	Users []User
@@ -80,4 +81,5 @@ type ChanUsers struct {
 type MainPage struct {
 	Products   []Product
 	Categories []Category
+	Users      []User
 }

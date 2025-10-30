@@ -21,6 +21,9 @@ func GetPostgresConn(cnf Config) (*sql.DB, error) {
 		cnf.Postgres.Sslmode,
 		cnf.Postgres.DialTimeout,
 	)
+	fmt.Println("Sslmode from config:", cnf.Postgres.Sslmode)
+	fmt.Println("Connstr:", connstr)
+
 	db, err := sql.Open("postgres", connstr)
 
 	if err != nil {
@@ -30,8 +33,7 @@ func GetPostgresConn(cnf Config) (*sql.DB, error) {
 	var PostgresPingError error
 	for i := 0; i < 10; i++ {
 		PostgresPingError = db.Ping()
-		if err == nil {
-			PostgresPingError = nil
+		if PostgresPingError == nil {
 			break
 		}
 		time.Sleep(2000)
@@ -40,6 +42,7 @@ func GetPostgresConn(cnf Config) (*sql.DB, error) {
 		fmt.Println("PostgresPingError:", PostgresPingError)
 		return db, PostgresPingError
 	}
+	fmt.Println("pinged successfuly")
 	return db, nil
 
 }
