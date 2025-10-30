@@ -82,11 +82,13 @@ func GetUsers(ch chan ChanUsers, ctx context.Context, db *sql.DB, timeout int) {
 func GetMainPage(ctx context.Context, db *sql.DB, timeout int) (MainPage, error) {
 	prod_chan := make(chan ChanProducts)
 	cats_chan := make(chan ChanCats)
+	users_chan := make(chan ChanUsers)
 	var chanprods ChanProducts
 	var chancats ChanCats
 	var MainPage MainPage
 	go GetProducts(prod_chan, ctx, timeout, db)
 	go GetCats(cats_chan, ctx, timeout, db)
+	go GetUsers(users_chan, ctx, db, timeout)
 	chancats = <-cats_chan
 	chanprods = <-prod_chan
 	if chancats.Err != nil {
