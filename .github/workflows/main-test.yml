@@ -18,36 +18,36 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: testiki
-    run: |
-      docker compose up --build -d
-      echo "⏳ Waiting for containers to start..."
-      sleep 5
+      run: |
+        docker compose up --build -d
+        echo "⏳ Waiting for containers to start..."
+        sleep 5
 
-      services=($(docker ps -a --format "{{.Names}}"))
-      echo "Services: ${services[@]}"
+        services=($(docker ps -a --format "{{.Names}}"))
+        echo "Services: ${services[@]}"
 
-      for dir in ${services[@]}; do
-        if [ "$dir" != "cash" ] && [ "$dir" != "store_nginx" ] && [ "$dir" != "mydb" ]; then
-          echo "🕓 Waiting for $dir to be healthy..."
-          # ждём пока контейнер перестанет быть restarting
-          for i in {1..30}; do
+        for dir in ${services[@]}; do
+          if [ "$dir" != "cash" ] && [ "$dir" != "store_nginx" ] && [ "$dir" != "mydb" ]; then
+            echo "🕓 Waiting for $dir to be healthy..."
+            # ждём пока контейнер перестанет быть restarting
+            for i in {1..30}; do
+              state=$(docker inspect -f '{{.State.Status}}' "$dir")
+              if [ "$state" = "running" ]; then
+                echo "✅ $dir is running"
+                break
+              else
+                echo "⏳ $dir state: $state, waiting..."
+                sleep 2
+              fi
+            done
+
             state=$(docker inspect -f '{{.State.Status}}' "$dir")
-            if [ "$state" = "running" ]; then
-              echo "✅ $dir is running"
-              break
-            else
-              echo "⏳ $dir state: $state, waiting..."
-              sleep 2
+            if [ "$state" != "running" ]; then
+              echo "❌ $dir is not running (state=$state), skipping tests"
+              continue
             fi
-          done
 
-          state=$(docker inspect -f '{{.State.Status}}' "$dir")
-          if [ "$state" != "running" ]; then
-            echo "❌ $dir is not running (state=$state), skipping tests"
-            continue
+            echo "▶️ Running tests in $dir..."
+            docker exec "$dir" go test ./... || true
           fi
-
-          echo "▶️ Running tests in $dir..."
-          docker exec "$dir" go test ./... || true
-        fi
-      done
+        done
