@@ -85,7 +85,7 @@ func VerifyCSRF(secret string, token string) (int, string, error) {
 	// декодируем
 	data, err := base64.URLEncoding.DecodeString(payloadEnc)
 	if err != nil {
-		return id, token, fmt.Errorf("err while decoding csrf data:", err.Error())
+		return id, token, fmt.Errorf("err while decoding csrf data:%w", err)
 	}
 	signature, err := base64.URLEncoding.DecodeString(signatureEnc)
 	if err != nil {
