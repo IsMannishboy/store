@@ -1,86 +1,56 @@
-name: main test
+name: main test  
 
 on:
   push:
     branches: dev
     paths:
       - "app/**"
+    
+  
 
 jobs:
 
-  # 🧱 1. Сборка Docker образов и кеширование
+
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    
+    - name: testiki
+      run: |
+        docker compose up --build -d
+        echo "⏳ Waiting for containers to start..."
+        sleep 5
+        docker compose logs --tail=100
+        services=($(docker ps -a --format "{{.Names}}"))
+        echo "Services: ${services[@]}"
 
-      - name: Build Docker images
-        run: |
-          echo "🚧 Building Docker images..."
-          docker compose build
-
-      - name: Save built images as artifact
-        run: |
-          mkdir -p /tmp/docker
-          docker save $(docker images --format '{{.Repository}}:{{.Tag}}' | grep -v "<none>") -o /tmp/docker/images.tar
-
-      - name: Upload Docker images
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-images
-          path: /tmp/docker/images.tar
-
-  # 🧪 2. Запуск тестов, используя собранные образы
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download Docker images
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-images
-          path: /tmp/docker
-
-      - name: Load Docker images
-        run: |
-          echo "📦 Loading Docker images..."
-          docker load -i /tmp/docker/images.tar
-
-      - name: Run containers
-        run: |
-          docker compose up -d
-          echo "⏳ Waiting for containers to start..."
-          sleep 5
-          docker compose logs --tail=100
-          services=($(docker ps -a --format "{{.Names}}"))
-          echo "Services: ${services[@]}"
-
-          for dir in ${services[@]}; do
-            if [ "$dir" != "cash" ] && [ "$dir" != "store_nginx" ] && [ "$dir" != "mydb" ]; then
-              echo "🕓 Waiting for $dir to be healthy..."
-              for i in {1..30}; do
-                state=$(docker inspect -f '{{.State.Status}}' "$dir")
-                if [ "$state" = "running" ]; then
-                  echo "✅ $dir is running"
-                  break
-                else
-                  echo "⏳ $dir state: $state, waiting..."
-                  sleep 2
-                fi
-              done
-
+        for dir in ${services[@]}; do
+          if [ "$dir" != "cash" ] && [ "$dir" != "store_nginx" ] && [ "$dir" != "mydb" ]; then
+            echo "🕓 Waiting for $dir to be healthy..."
+            # ждём пока контейнер перестанет быть restarting
+            for i in {1..30}; do
               state=$(docker inspect -f '{{.State.Status}}' "$dir")
-              if [ "$state" != "running" ]; then
-                echo "❌ $dir is not running (state=$state), skipping tests"
-                docker logs $dir
-                continue
+              if [ "$state" = "running" ]; then
+                echo "✅ $dir is running"
+                break
+              else
+                echo "⏳ $dir state: $state, waiting..."
+                sleep 2
               fi
+            done
 
-              echo "▶️ Running tests in $dir..."
-              docker exec "$dir" go test ./... || true
+            state=$(docker inspect -f '{{.State.Status}}' "$dir")
+            if [ "$state" != "running" ]; then
+              echo "❌ $dir is not running (state=$state), skipping tests"
+              docker logs $dir
+
+              continue
             fi
-          done
+
+            echo "▶️ Running tests in $dir..."
+            docker exec "$dir" go test ./... || true
+          fi
+        done

@@ -57,6 +57,7 @@ func MainHandler(logger *log.Logger, redis_db *redis.Client, db *sql.DB, cnf *i.
 			"csrf":       new_csrf,
 			"products":   MainPage.Products,
 			"categories": MainPage.Categories,
+			"users":      MainPage.Users,
 		})
 	}
 }

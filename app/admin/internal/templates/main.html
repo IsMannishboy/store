@@ -97,7 +97,8 @@
                 <tbody id="product-table">
                     {{if .products}}
                     {{range .products}}
-                        <tr>
+                        <div id="{{.Id}}">
+                            <tr>
                         <td>{{.Id}}</td>
                         <td>{{.Name}}</td>
                         <td>{{.Price}}</td>
@@ -109,10 +110,10 @@
                         <td>{{.Description}}</td>
                         <td>{{.Category}}</td>
                         <td>
-                            <button class="btn">✏️ Редактировать</button>
-                            <button class="btn">🗑 Удалить</button>
+                            <button class="btn" id="delete">🗑 Удалить</button>
                         </td>
                     </tr>
+                        </div>
                     {{end}}
                     {{end}}
                    
@@ -125,20 +126,7 @@
     </div>
 
     <script>
-        function addProduct() {
-            const table = document.getElementById('product-table');
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>3</td>
-                <td>Новый товар</td>
-                <td>0 €</td>
-                <td>В наличии</td>
-                <td>
-                    <button class="btn">✏️ Редактировать</button>
-                    <button class="btn">🗑 Удалить</button>
-                </td>`;
-            table.appendChild(row);
-        }
+        let del = document.getElementById("delete")
     </script>
 </body>
 </html>
