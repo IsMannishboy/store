@@ -6,7 +6,8 @@ services:
       - POSTGRES_USER=21savage
       - POSTGRES_PASSWORD=1234
       - POSTGRES_DB=mydb
-    
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     
     networks:
       - daun-net
@@ -21,7 +22,9 @@ services:
     depends_on:
       - mydb
     restart: always
-   
+    volumes:
+      - /home/savage21/hardWork/go/store/store/app/main/internal/templates/html:/app/internal/templates/html
+      - /home/savage21/hardWork/go/store/store/app/main:/app
 
     networks:
     - daun-net
@@ -32,7 +35,8 @@ services:
     ports:
       - "82:80"
     container_name: auth
-   
+    volumes:
+      - /home/savage21/hardWork/go/store/store/app/auth:/app
     depends_on:
       - main
     restart: always
@@ -43,7 +47,8 @@ services:
     ports:
      - "83:80"
     container_name: admin
-   
+    volumes:
+      - /home/savage21/hardWork/go/store/store/app/admin:/app
     depends_on:
       - mydb
     restart: always
@@ -59,7 +64,9 @@ services:
     restart: always
     ports :
       - "80:80"
-   
+    volumes:
+    - /home/savage21/hardWork/go/store/store/app/nginx/html:/usr/share/nginx/html
+    - /home/savage21/hardWork/go/store/store/app/nginx/conf/default.conf:/etc/nginx/conf.d/default.conf
     networks:
     - daun-net
        
@@ -69,14 +76,17 @@ services:
     ports:
       - ":6379"
     restart: always
-   
+    volumes:
+      - cash:/data
     networks:
     - daun-net
       
     
 
 
-
+volumes:
+  pgdata:
+  cash:
 networks:
   daun-net:
     driver: bridge 

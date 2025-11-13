@@ -68,6 +68,14 @@
         .btn:hover {
             background: #1d4ed8;
         }
+        #add-form {
+            display: none;
+            margin-top: 15px;
+        }
+        input, select {
+            padding: 6px;
+            margin: 4px;
+        }
     </style>
 </head>
 <body>
@@ -80,6 +88,7 @@
             <li><a href="#">⚙ Настройки</a></li>
         </ul>
     </div>
+
     <div class="content">
         <h1>Панель администратора</h1>
         <div class="card">
@@ -91,42 +100,131 @@
                         <th>Название</th>
                         <th>Цена</th>
                         <th>Статус</th>
+                        <th>Описание</th>
+                        <th>Категория</th>
                         <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody id="product-table">
                     {{if .products}}
                     {{range .products}}
-                        <div id="{{.Id}}">
-                            <tr>
+                    <tr data-id="{{.Id}}">
                         <td>{{.Id}}</td>
                         <td>{{.Name}}</td>
                         <td>{{.Price}}</td>
                         {{if .Stock}}
-                            <td> в наличии: {{.Stock}}</td>
+                            <td>в наличии: {{.Stock}}</td>
                         {{else}}
                             <td>не в наличии</td>
                         {{end}}
                         <td>{{.Description}}</td>
                         <td>{{.Category}}</td>
                         <td>
-                            <button class="btn" id="delete">🗑 Удалить</button>
+                            <button class="btn delete-btn">🗑 Удалить</button>
                         </td>
                     </tr>
-                        </div>
                     {{end}}
                     {{end}}
-                   
-                    
                 </tbody>
             </table>
+
             <br>
-            <button class="btn" onclick="addProduct()">➕ Добавить товар</button>
+            <button class="btn" id="show-add-form">➕ Добавить товар</button>
+
+            <form id="add-form">
+                <input type="text" id="name" placeholder="Название" required>
+                <input type="number" id="price" placeholder="Цена" required>
+                <input type="number" id="stock" placeholder="Количество" required>
+                <input type="text" id="desc" placeholder="Описание">
+                <input type="text" id="category" placeholder="Категория">
+                <button type="submit" class="btn">✅ Добавить</button>
+            </form>
+        </div>
+        <div>
+            <p>users list</p><br>
+            <ul>
+                {{if .users}}
+                {{range .users}}
+                <li>
+                    <div>
+                        <p>name:{{.Username}}</p>
+                        <p>email:{{.Email}}</p>
+                        <button class="user delete">delete</button>
+                    </div>
+                </li>
+                {{end}}
+                {{else}}
+                <li>empty list</li>
+                {{end}}
+            </ul>
         </div>
     </div>
 
     <script>
-        let del = document.getElementById("delete")
-    </script>
-</body>
-</html>
+document.addEventListener("DOMContentLoaded", () => {
+    const table = document.getElementById("product-table");
+    const csrf = document.getElementById("csrf").content;
+
+    // === УДАЛЕНИЕ ===
+    table.addEventListener("click", async (e) => {
+        if (e.target.classList.contains("delete-btn")) {
+            const row = e.target.closest("tr");
+            const id = row.dataset.id;
+
+            if (!confirm("Удалить этот товар?")) return;
+
+            const res = await fetch(`/delete/${id}/${csrf}`, { method: "POST" });
+            if (res.ok) row.remove();
+            else alert("Ошибка при удалении");
+        }
+    });
+
+    // === ДОБАВЛЕНИЕ ===
+    document.getElementById("show-add-form").addEventListener("click", () => {
+        const form = document.getElementById("add-form");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    });
+
+    document.getElementById("add-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const price = parseFloat(document.getElementById("price").value);
+        const stock = parseInt(document.getElementById("stock").value);
+        const desc = document.getElementById("desc").value;
+        const category = document.getElementById("category").value;
+
+        const body = { name, price, stock, desc, category };
+
+        const res = await fetch(`/add/${csrf}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+
+            // добавляем новую строку
+            const row = document.createElement("tr");
+            row.dataset.id = body.Id;
+            row.innerHTML = `
+                <td>${body.Id}</td>
+                <td>${body.Name}</td>
+                <td>${body.Price}</td>
+                <td>в наличии: ${body.Stock}</td>
+                <td>${body.Description}</td>
+                <td>${body.Category}</td>
+                <td><button class="btn delete-btn">🗑 Удалить</button></td>
+            `;
+            table.appendChild(row);
+
+            e.target.reset();
+            e.target.style.display = "none";
+        } else {
+            
+            alert("Ошибка при добавлении товара");
+        }
+    });
+});
+</script>
+

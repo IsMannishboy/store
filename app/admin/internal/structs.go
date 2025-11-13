@@ -50,12 +50,13 @@ type Category struct {
 	Name string
 }
 type Product struct {
-	Id          int
-	Name        string
-	Description string
-	Price       float64
-	Stock       int
-	Category    string
+	Id           int       `json:"id"`
+	Name         string    `json:"name"`
+	Price        float64   `json:"price"`
+	Stock        int       `json:"stock"`
+	Description  string    `json:"description"`
+	Category     string    `json:"category"`
+	DateOfCreate time.Time `json:"created_at"`
 }
 type ChanProducts struct {
 	Id       int

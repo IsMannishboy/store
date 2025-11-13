@@ -35,28 +35,7 @@ func GetProducts(db *sql.DB, ch chan s.Products_chan_struct, ctx context.Context
 	ch <- data
 	close(ch)
 }
-func GetCategories(db *sql.DB, ch chan s.Cat_chan_struct, cxt context.Context, timeout int) {
-	fmt.Println("GetCategories query")
-	newcontext, cancel := context.WithTimeout(cxt, time.Duration(timeout)*time.Second)
-	defer cancel()
-	var cats s.Cat_chan_struct
-	cats.Err = nil
-	rows, err := db.QueryContext(newcontext, `select * from categories`)
-	if err != nil {
-		cats.Err = err
-		ch <- cats
-	}
-	var cat s.Categorie
-	for rows.Next() {
-		err := rows.Scan(cat.ID, cat.Name)
-		if err != nil {
-			cats.Err = err
-			ch <- cats
-		}
-	}
-	ch <- cats
-	close(ch)
-}
+
 func GetCart(id int, db *sql.DB, ctx context.Context, timeout int, ch chan s.Cart_chan_struct) {
 	fmt.Println("GetCart query")
 	fmt.Printf("id type: %T, value: %v\n", id, id)
@@ -110,22 +89,14 @@ func GetCart(id int, db *sql.DB, ctx context.Context, timeout int, ch chan s.Car
 func GetMainPageData(id int, db *sql.DB, ctx context.Context, timeout int) (error, s.MainpageData) {
 	var MainData s.MainpageData
 	products_chan := make(chan s.Products_chan_struct)
-	cat_chan := make(chan s.Cat_chan_struct)
 	cart_chan := make(chan s.Cart_chan_struct)
 
 	go GetProducts(db, products_chan, ctx, timeout)
-	go GetCategories(db, cat_chan, ctx, timeout)
 	go GetCart(id, db, ctx, timeout, cart_chan)
-	var cs s.Cat_chan_struct
 	var ps s.Products_chan_struct
 	var cart s.Cart_chan_struct
 	var err error
-	cs = <-cat_chan
-	if cs.Err != nil {
-		fmt.Println("err while categories query:", cs.Err.Error())
-		err = cs.Err
-	}
-	MainData.Categories = cs.Categories
+
 	ps = <-products_chan
 	fmt.Println(MainData.Categories)
 	if ps.Err != nil {
